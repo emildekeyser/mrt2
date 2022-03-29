@@ -1,3 +1,6 @@
+This repo only contains the part of the program that I worked on (backend), the
+frontend is redacted.
+
 Installation
 ============
 
