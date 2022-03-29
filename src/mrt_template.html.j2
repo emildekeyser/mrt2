@@ -1,0 +1,221 @@
+{#
+#   __                                 ___              __              
+#  /\ \__                             /\_ \            /\ \__           
+#  \ \ ,_\     __     ___ ___    _____\//\ \       __  \ \ ,_\     __   
+#   \ \ \/   /'__`\ /' __` __`\ /\ '__`\\ \ \    /'__`\ \ \ \/   /'__`\ 
+#    \ \ \_ /\  __/ /\ \/\ \/\ \\ \ \L\ \\_\ \_ /\ \L\.\_\ \ \_ /\  __/ 
+#     \ \__\\ \____\\ \_\ \_\ \_\\ \ ,__//\____\\ \__/.\_\\ \__\\ \____\
+#      \/__/ \/____/ \/_/\/_/\/_/ \ \ \/ \/____/ \/__/\/_/ \/__/ \/____/
+#                                  \ \_\                                
+#                                   \/_/                                
+#}
+
+{#
+################################################################################
+
+run_tests_v2.py runs all tests for all students and writes the results to some
+archiving back ends and uses this template to generate a fresh index.html.
+
+################################################################################
+#}
+
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" href="/img/favicon.png"/>
+
+        <!-- CSS imports -->
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap.min.css">    
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.1.8/css/fixedHeader.dataTables.min.css"/>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<!-- refresh favicon -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <!-- Our Custom CSS -->
+        <link rel="stylesheet" type="text/css" href="/css/style.css"/>
+
+        <!-- JS imports -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap.min.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.1.8/js/dataTables.fixedHeader.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+        <!-- Our Custom JS -->
+        <script type="text/javascript" src="/js/config.js"></script>
+        <script type="text/javascript" src="/js/datatable.js"></script>
+        <script type="text/javascript" src="/js/main.js"></script>
+        <script type="text/javascript" src="/js/enqueue.js"></script>
+        <script type="text/javascript" src="/js/draggablequeue.js"></script>
+        <script type="text/javascript" src="/js/dark-mode.js"></script>
+
+	 <!--bootstrap js for modals-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+        <!--bootstrap css for modals-->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    </head>
+
+    <body>
+
+        <!-- Live Queue Modal -->
+        <div id="dragQueue" class="ui-widget-content">
+            <div id="dragQueueHeader"><h3 id="dQH">Live Queue</h3></div>
+            <table id="queueList"></table>
+        </div>
+        
+        <!-- UCLL header and header buttons -->
+        <header>
+            <div class="ucll-header">
+                <div class="ucll-header-container">
+                    <object data="https://www.ucll.be/sites/all/themes/balance_theme/images/logo.svg" type="image/svg+xml">
+                        <img src="https://www.ucll.be/sites/all/themes/balance_theme/images/logo.png" alt="UCLLlabs">
+                    </object>
+                    <span class="main-heading">Systeembeheer - Server Checks</span>
+                </div>
+            </div>
+            <div class="tyrian-bar">
+                <ul class="infobar">
+                    <li id="dark-theme-btn" onclick="toggleDarkMode(true)"></li>
+                    <a href="https://hackmd.io/zflFD-ZMRYWyKh_WkOfmhw#" target="_blank"><li id="help-btn">Help</li></a>
+		    <li id="qSize" onclick="toggleLiveQueue()"></li>
+                </ul>   
+            </div>
+        </header>
+
+        <!-- Custom search input field -->
+        
+	<div id="search_and_queue_hor">
+	<div class="group">      
+            <input type="search" id="searchBar" required novalidate>
+            <span class="highlight"></span>
+            <span class="bar"></span>
+            <label>Search</label>
+        </div>
+	    <div id="horizontalQueue">
+          <!--      <div class="queueSquare"><span class=queueTooltip></span></div>
+	        <div class="queueSquare"><span class=queueTooltip></span></div>
+	        <div class="queueSquare"><span class=queueTooltip></span></div>
+	        <div class="queueSquare"><span class=queueTooltip></span></div>		
+	        <div class="queueSquare"><span class=queueTooltip></span></div>
+	        <div class="queueSquare"><span class=queueTooltip></span></div>
+	        <div class="queueSquare"><span class=queueTooltip></span></div>
+                <div class="queueSquare"><span class=queueTooltip></span></div>
+                <div class="queueSquare"><span class=queueTooltip></span></div>
+		<div class="queueSquare"><span class=queueTooltip></span></div>
+		<div class="queueSquare"><span class=queueTooltip></span></div>
+		<div class="queueSquare"><span class=queueTooltip></span></div>
+		<div class="queueSquare"><span class=queueTooltip></span></div>
+		<div class="queueSquare"><span class=queueTooltip></span></div>
+		<div class="queueSquare"><span class=queueTooltip></span></div>
+		<div class="queueSquare"><span class=queueTooltip></span></div>
+		<div class="queueSquare"><span class=queueTooltip></span></div> -->	
+	    </div>
+	</div>
+	
+	<!-- Queue test are you sure Modal bootstrap -->
+        <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+	    <!-- Add class modal-dialog-centered if you prefer modal at top of screen -->
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmModalLabel">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <p style='position: relative;top: 3px;padding-right: 7px;'>Are you sure?</p>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary">Queue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+	 <!-- Enqueue Modal bootstrap -->
+        <div class="modal fade" id="enqueueModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+            <!-- Add class modal-dialog-centered if you prefer modal at top of screen -->
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header enqueueModal">
+                        <h5 class="modal-title" id="enqueueModalLabel">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body enqueueModalBody">
+
+                    </div>
+                    <div class="modal-footer enqueueModalFooter">
+			
+                    </div>
+                </div>
+            </div>
+        </div>
+
+	<!-- Cancel test are you sure Modal bootstrap -->
+        <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel" aria-hidden="true">
+            <!-- Add class modal-dialog-centered if you prefer modal at top of screen -->
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cancelModalLabel">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <p style='position: relative;top: 3px;padding-right: 7px;'>Are you sure?</p>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                        <button type="button" id="cancelTestBtn" class="btn btn-danger">Remove</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Datatable Column Names -->
+        <table id="table_id" class="table table-striped table-bordered table_dark" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>VMID</th>
+                    <th>NAME</th>
+                    {% for testname in testnames %} 
+                    <th><a href="https://REDACTED_{{ testname }}">{{ testname.upper() }}</a></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for host, vmid, ip, testdata in studentlist %} 
+            <tr> <th scope="row">{{ vmid }}</th> <th scope="row">{{ host }} {{ ip }}</th>
+                {% for testdir, testscript, line1, line2, imgname, enquable in testdata -%}
+                <td data-order="{{ line1 }}">
+                    {%- if enquable -%}
+                    <img src="/img/{{ imgname }}.png" class="clickable" onclick="queueCheck(event, {{ vmid }}, '{{ host }}', '{{ ip }}', '{{ testdir }}','{{ testscript }}')" title="{{ line2 }}"/>
+                    {%- else -%}
+                    <img src="/img/{{ imgname }}.png" class="clickable manual"  title="{{ line2 }}"/>
+                    {%- endif -%}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <footer class="footer">
+        <div class="footer-container">
+            <p id="timestamp">Table generated at <span style="font-weight: bold">{{ timestamp }}</span></p>
+        </div>
+    </footer>
+    </body>
+</html> 

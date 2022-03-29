@@ -1,0 +1,4 @@
+[Service]
+ExecStart=/usr/local/mrt2/src/queue_server.py
+User=queueer
+Group=queueer

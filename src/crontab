@@ -1,0 +1,2 @@
+0 6 * * * /usr/local/mrt2/src/reset-attempts.sh
+0 */2 * * * /usr/local/mrt2/src/run_tests_v2.py
